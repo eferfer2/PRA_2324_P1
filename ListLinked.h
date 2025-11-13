@@ -1,131 +1,123 @@
 #ifndef LISTLINKED_H
 #define LISTLINKED_H
 
-#include <ostream>
+#include <iostream>
 #include <stdexcept>
 #include "list.h"
 #include "node.h"
 
-template<typename T>
+template <typename T>
 class ListLinked : public List<T> {
 private:
     Node<T>* first;
     int n;
 
 public:
-    // constructor
-    ListLinked() : first(nullptr), n(0) { }
+    ListLinked() : first(nullptr), n(0) {}
 
-    // destructor
     ~ListLinked() {
-        Node<T>* cur = first;
-        while (cur != nullptr) {
-            Node<T>* aux = cur->next;
-            delete cur;
-            cur = aux;
+        Node<T>* curr = first;
+        while (curr != nullptr) {
+            Node<T>* tmp = curr->next;
+            delete curr;
+            curr = tmp;
         }
     }
 
-    // tamaño de la lista
-    int size() const override {
+    int size() const {
         return n;
     }
 
-    // vacía?
-    bool empty() const override {
-        return (n == 0);
+    bool empty() const {
+        return n == 0;
     }
 
-    // insertar en posición pos el valor v
-    void insert(int pos, const T& v) override {
-        if (pos < 0 || pos > n) {
-            throw std::out_of_range("Posición inválida!");
-        }
-        if (pos == 0) {
-            first = new Node<T>(v, first);
-        } else {
+    void insert(int pos, const T& e) {
+        if (pos < 0 || pos > n)
+            throw std::out_of_range("Posición inválida");
+
+        if (pos == 0)
+            first = new Node<T>(e, first);
+        else {
             Node<T>* prev = first;
-            for (int i = 0; i < pos-1; ++i) {
+            for (int i = 0; i < pos - 1; ++i)
                 prev = prev->next;
-            }
-            prev->next = new Node<T>(v, prev->next);
+            prev->next = new Node<T>(e, prev->next);
         }
         ++n;
     }
 
-    // eliminar en posición pos y devolver el valor eliminado
-    T remove(int pos) override {
-        if (pos < 0 || pos >= n) {
-            throw std::out_of_range("Posición inválida!");
-        }
-        Node<T>* toDelete = nullptr;
-        T valor;
+    T remove(int pos) {
+        if (pos < 0 || pos >= n)
+            throw std::out_of_range("Posición inválida");
+
+        Node<T>* toDelete;
+        T value;
+
         if (pos == 0) {
             toDelete = first;
-            valor = first->elem;
+            value = first->data;
             first = first->next;
         } else {
             Node<T>* prev = first;
-            for (int i = 0; i < pos-1; ++i) {
+            for (int i = 0; i < pos - 1; ++i)
                 prev = prev->next;
-            }
             toDelete = prev->next;
-            valor = toDelete->elem;
+            value = toDelete->data;
             prev->next = toDelete->next;
         }
         delete toDelete;
         --n;
-        return valor;
+        return value;
     }
 
-    // obtener el valor en posición pos (sin modificar)
-    T get(int pos) const override {
-        if (pos < 0 || pos >= n) {
-            throw std::out_of_range("Posición inválida!");
-        }
-        Node<T>* cur = first;
-        for (int i = 0; i < pos; ++i) {
-            cur = cur->next;
-        }
-        return cur->elem;
+    T get(int pos) const {
+        if (pos < 0 || pos >= n)
+            throw std::out_of_range("Posición inválida");
+
+        Node<T>* curr = first;
+        for (int i = 0; i < pos; ++i)
+            curr = curr->next;
+        return curr->data;
     }
 
-    // sobrecarga del operador []
+    // operador []
     T operator[](int pos) const {
         return get(pos);
     }
 
-    // buscar valor v: devuelve índice o -1 si no lo encuentra
-    int search(const T& v) const override {
-        Node<T>* cur = first;
-        int idx = 0;
-        while (cur != nullptr) {
-            if (cur->elem == v) {
-                return idx;
-            }
-            cur = cur->next;
-            ++idx;
+    // búsqueda lineal
+    int search(const T& e) const {
+        Node<T>* curr = first;
+        int index = 0;
+        while (curr != nullptr) {
+            if (curr->data == e)
+                return index;
+            curr = curr->next;
+            ++index;
         }
         return -1;
     }
 
-    // imprimir por flujo de salida
+    // métodos extra según tu List.h
+    void append(const T& e) {
+        insert(n, e);
+    }
+
+    void prepend(const T& e) {
+        insert(0, e);
+    }
+
     friend std::ostream& operator<<(std::ostream& out, const ListLinked<T>& list) {
         out << "List => [";
-        Node<T>* cur = list.first;
+        Node<T>* curr = list.first;
         bool firstElem = true;
-        while (cur != nullptr) {
-            if (!firstElem) {
-                out << "  ";
-            } else {
+        while (curr != nullptr) {
+            if (!firstElem)
                 out << " ";
-                firstElem = false;
-            }
-            out << cur->elem;
-            cur = cur->next;
-        }
-        if (!firstElem) {
-            out << " ";
+            out << curr->data;
+            curr = curr->next;
+            firstElem = false;
         }
         out << "]";
         return out;
@@ -133,3 +125,4 @@ public:
 };
 
 #endif
+
